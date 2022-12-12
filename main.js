@@ -14,9 +14,9 @@ const colors = require('colors');
 
 puppeteer.use(StealthPlugin())
 
-var sell_time = new Date(2022,11,12,18,00,00,000).getTime();
+var sell_time = new Date(2022,11,13,00,30,00,000).getTime();
 var seconds_ahead = 1
-// var seconds_ahead = 0.5
+var build_request_safe_margin = 0
 var load_time = sell_time - seconds_ahead * 1000;
 
 (async()=>{
@@ -35,7 +35,7 @@ var load_time = sell_time - seconds_ahead * 1000;
     page.on('request', (request) => {        
     if(request.url().includes('trade.order.build')) {
         var pending = setInterval(() => {
-            if ( Date.now() > sell_time ) {
+            if ( Date.now() > sell_time + build_request_safe_margin * 1000 ) {
                 request.continue();
                 console.log('=>'.green, print_current_time(), request.method(), request.url().slice(0, 70))
                 clearInterval(pending);
@@ -61,19 +61,22 @@ var load_time = sell_time - seconds_ahead * 1000;
 
             clearInterval(loop);
             console.log( print_current_time() + ' time is up');
-
             // await page.reload(  { waitUntil: ['networkidle0', 'domcontentloaded'] }  );
-            await page.reload(  { waitUntil: ['domcontentloaded'] }  );
+            // await page.reload(  { waitUntil: ['domcontentloaded'] }  );
             // await page.reload(  { waitUntil: ['networkidle0'] }  );
             // await page.reload(  { waitUntil: ['networkidle2'] }  );
             // await page.reload( { waitUntil: ['load'] } );
-            // await page.reload();
+            await page.reload();
             console.log( print_current_time() + ' reloaded');
 
-            var submit_turn = 1;
-            var punish_turn = 0;
-            var pre_cash_turn = 0;
-            var password_turn = 0;
+            const submit_order = await page.waitForXPath('//*[@id="submitBlock_1"]/div/div/div/div[3]')
+            await submit_order.click();
+            console.log( print_current_time() + ' submit order button clicked');
+
+            var submit_turn = 0;
+            var punish_turn = 1;
+            var pre_cash_turn = 1;
+            var password_turn = 1;
             var submit_waiting = 0;
             var punish_waiting = 0;
             var pre_cash_waiting = 0;
@@ -94,7 +97,7 @@ var load_time = sell_time - seconds_ahead * 1000;
                 const submit_order = await page.waitForXPath('//*[@id="submitBlock_1"]/div/div/div/div[3]',
                     {timeout: 500}).catch(() => {
                         submit_waiting = 0;
-                        console.log( print_current_time() + ' no submit order button');
+                        // console.log( print_current_time() + ' no submit order button');
                 });
                 submit_waiting = 0;
 
@@ -134,7 +137,7 @@ var load_time = sell_time - seconds_ahead * 1000;
                 const punish_dialog = await page.waitForXPath('/html/body/div[4]/div[2]/div',
                  {timeout: 500}).catch(() => {
                     punish_waiting = 0;
-                    console.log( print_current_time() + ' no punish dialog');
+                    // console.log( print_current_time() + ' no punish dialog');
                 });
                 punish_waiting = 0;
 
@@ -175,7 +178,7 @@ var load_time = sell_time - seconds_ahead * 1000;
                 ('#cashierPreConfirm > div.v2020v2-action > button', 
                 {timeout: 500, visible: true }).catch(() => {
                     pre_cash_waiting = 0;
-                    console.log( print_current_time() + ' no cashierPreConfirm button');
+                    // console.log( print_current_time() + ' no cashierPreConfirm button');
                 });
                 pre_cash_waiting = 0;
 
@@ -205,7 +208,7 @@ var load_time = sell_time - seconds_ahead * 1000;
                 ('#pwd_unencrypt',
                 {timeout: 500, visible: true }).catch(() => {
                     password_waiting = 0;
-                    console.log( print_current_time() + ' no password input found');
+                    // console.log( print_current_time() + ' no password input found');
                 });
                 password_waiting = 0;
 
