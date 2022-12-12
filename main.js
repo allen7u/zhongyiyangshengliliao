@@ -14,8 +14,9 @@ const colors = require('colors');
 
 puppeteer.use(StealthPlugin())
 
-var sell_time = new Date(2022,11,12,00,00,00,000).getTime();
+var sell_time = new Date(2022,11,12,18,00,00,000).getTime();
 var seconds_ahead = 1
+// var seconds_ahead = 0.5
 var load_time = sell_time - seconds_ahead * 1000;
 
 (async()=>{
@@ -61,11 +62,13 @@ var load_time = sell_time - seconds_ahead * 1000;
             clearInterval(loop);
             console.log( print_current_time() + ' time is up');
 
-            await page.reload();
+            // await page.reload(  { waitUntil: ['networkidle0', 'domcontentloaded'] }  );
+            await page.reload(  { waitUntil: ['domcontentloaded'] }  );
+            // await page.reload(  { waitUntil: ['networkidle0'] }  );
+            // await page.reload(  { waitUntil: ['networkidle2'] }  );
+            // await page.reload( { waitUntil: ['load'] } );
+            // await page.reload();
             console.log( print_current_time() + ' reloaded');
-            // const button = await page.waitForXPath('//*[@id="submitBlock_1"]/div/div/div/div[3]');
-            // await button.click();
-            // console.log( print_current_time() + 'submit clicked');
 
             var submit_turn = 1;
             var punish_turn = 0;
@@ -101,16 +104,21 @@ var load_time = sell_time - seconds_ahead * 1000;
                     submit_lock = 1;
 
                         // random delay between 125 and 175 ms
-                        var random_milliseconds = Math.floor(Math.random() * 50) + 125;
+                        // var random_milliseconds = Math.floor(Math.random() * 50) + 125;
+                        var random_milliseconds = Math.floor(Math.random() * 0) + 0;
                         setTimeout( async () => {
-                            await submit_order.click();
-                            console.log( print_current_time() + ' submit order button clicked in ' + random_milliseconds + ' ms');
-                            // clearInterval(submit);
-                            submit_turn = 0;
-                            submit_lock = 0;
-                            punish_turn = 1;
-                            pre_cash_turn = 1;
-                            password_turn = 1;
+                            try{
+                                await submit_order.click();
+                                console.log( print_current_time() + ' submit order button clicked in ' + random_milliseconds + ' ms');
+                                // clearInterval(submit);
+                                submit_turn = 0;
+                                submit_lock = 0;
+                                punish_turn = 1;
+                                pre_cash_turn = 1;
+                                password_turn = 1;
+                            } catch (e) {
+                                console.log( print_current_time() + ' submit order button clicked error: '.red + e);
+                            }
                         },  random_milliseconds );                   
                 }
             }, 50);
@@ -136,16 +144,21 @@ var load_time = sell_time - seconds_ahead * 1000;
                     punish_lock = 1;
 
                     // random delay between 125 and 175 ms
-                    var random_milliseconds = Math.floor(Math.random() * 50) + 125;
+                    // var random_milliseconds = Math.floor(Math.random() * 50) + 125;
+                    var random_milliseconds = Math.floor(Math.random() * 0) + 0;
                     setTimeout( async () => {
-                        await punish_dialog.click();
-                        console.log( print_current_time() + ' punish dialog clicked in ' + random_milliseconds + ' ms');
-                        // clearInterval(punish);
-                        punish_turn = 0;
-                        punish_lock = 0;
-                        submit_turn = 1;
-                        pre_cash_turn = 0;
-                        password_turn = 0;
+                        try{
+                            await punish_dialog.click();
+                            console.log( print_current_time() + ' punish dialog clicked in ' + random_milliseconds + ' ms');
+                            // clearInterval(punish);
+                            punish_turn = 0;
+                            punish_lock = 0;
+                            submit_turn = 1;
+                            pre_cash_turn = 0;
+                            password_turn = 0;
+                        }catch(e){
+                            console.log( print_current_time() + ' punish dialog clicked error: '.red + e);
+                        }
                     },  random_milliseconds );                    
                 }
             }, 50);
